@@ -70,19 +70,8 @@ public class SignupActivity extends AppCompatActivity {
                 binding.signup.setEnabled(true);
                 binding.signup.setAlpha(1f);
                 SignupModel asd = response.body();
-                try{
-                    if ("true".equals(response.body().getStatus()))
-                        Log.e("success", String.valueOf(asd));
-                    Log.d("success", response.body().getMessage());
-                    Toast.makeText(getApplicationContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
 
-                } catch (NullPointerException e){
-                    //Log.e("Error", e.getMessage());
-                    // new Gson().toJson(response.body().toString());
-                    Log.e("error", String.valueOf(asd));
-                    Log.d("error", response.body().getMessage());
-                    Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
-                }
+                Log.e("STATUS ", String.valueOf(asd.getStatus()));
             }
 
             @Override

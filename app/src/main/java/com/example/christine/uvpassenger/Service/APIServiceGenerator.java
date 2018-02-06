@@ -1,9 +1,14 @@
 package com.example.christine.uvpassenger.Service;
 
+import android.util.Log;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -12,20 +17,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class APIServiceGenerator {
-    public static final String API_BASE_URL = "http://192.168.1.12/uvmonitor_api/public/api/";
-    public static final String AUTHENTICATE_KEY = "Bearer 5a7175ef13599";
+    public static final String API_BASE_URL = "http://10.194.191.140/uvmonitor_api/public/api/";
+    public static final String AUTHENTICATE_KEY = "Bearer 5a785d53b4a46";
     public static String TOKEN;
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder()
             .readTimeout(5, TimeUnit.SECONDS)
-            .connectTimeout(5, TimeUnit.SECONDS)
-            .addInterceptor(chain -> {
-                Request request = chain.request().newBuilder()
-                        .addHeader("Accept", "application/json")
-                        .addHeader(" Authorization", TOKEN)
-                        .build();
-                return chain.proceed(request);
-            });
+            .connectTimeout(5, TimeUnit.SECONDS);
+
+
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
@@ -33,7 +33,24 @@ public class APIServiceGenerator {
                     .addConverterFactory(GsonConverterFactory.create());
 
     public static <S> S createService(Class<S> serviceClass) {
-        Retrofit retrofit = builder.client(httpClient.build()).build();
+        Retrofit retrofit = builder.client(httpClient.addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request original = chain.request();
+
+                Request request = original.newBuilder()
+                        .addHeader("Accept", "application/json")
+                        .addHeader("Authorization", TOKEN)
+                        .build();
+
+                Response response = chain.proceed(request);
+                if(response.code() == 401){
+                    Log.e("HI", "HI");
+                    return response;
+                }
+                return  response;
+            }
+        }).build()).build();
         return retrofit.create(serviceClass);
 
     }
